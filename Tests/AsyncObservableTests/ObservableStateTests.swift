@@ -8,7 +8,7 @@ struct AsyncObservableStateTests {
   @Test("Should update observable state")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testObservableStateUpdates() async {
-    let observable = await AsyncObservable(100)
+    let observable = AsyncObservable(100)
 
     // Update the underlying value
     observable.update(200)
@@ -21,7 +21,8 @@ struct AsyncObservableStateTests {
   @Test("Should not update state when updateObservable is false")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testNoStateUpdate() async {
-    let observable = await AsyncObservable(100)
+    let observable = AsyncObservable(100)
+    _ = await observable.valueObservable // make sure the lazy var has a value to test this
 
     // Update without updating observable state
     observable.update(200, updateObservable: false)
@@ -37,7 +38,7 @@ struct AsyncObservableStateTests {
   @Test("Should propagate observable changes to internal value")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testObservableToValueSync() async {
-    let observable = await AsyncObservable(100)
+    let observable = AsyncObservable(100)
 
     // Update the observable value directly (this is done on the MainActor)
     await MainActor.run {

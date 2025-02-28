@@ -14,7 +14,7 @@ struct AsyncObservableComplexTypesTests {
     }
 
     let initialUser = User(name: "John", age: 30)
-    let observable = await AsyncObservable(initialUser)
+    let observable = AsyncObservable(initialUser)
 
     let valueStream = observable.valueStream
     // Consume initial value
@@ -59,7 +59,7 @@ struct AsyncObservableComplexTypesTests {
     }
     
     let initialCounter = Counter(count: 0)
-    let observable = await AsyncObservable(initialCounter)
+    let observable = AsyncObservable(initialCounter)
     
     // Change the referenced object state
     observable.mutate { counter in

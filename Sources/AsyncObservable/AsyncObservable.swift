@@ -12,7 +12,7 @@ import Foundation
 /// Example usage:
 /// ```swift
 /// // Create a manager
-/// let manager = await AsyncObservable(0)
+/// let manager = AsyncObservable(0)
 ///
 /// // Observe via async stream
 /// for await value in await manager.stream() {
@@ -66,13 +66,20 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
   /// The observable state object for SwiftUI/UIKit integration.
   /// This property is accessed on the MainActor to ensure thread-safe UI updates.
   @MainActor
-  public var observable: State!
+  public lazy var observable: State = {
+    let observable = State(value: value, didSetValue: didUpdateFromObservable)
+    return observable
+  }()
 
+  /// The current value accessible from the MainActor.
+  /// This is a convenience property that provides direct access to the observable value.
   @MainActor
   public var valueObservable: T {
     observable.value
   }
 
+  /// An async stream of values that can be used with Swift concurrency.
+  /// This property provides a convenient way to access the value stream without calling `stream()`.
   public var valueStream: StreamOf<T> {
     stream()
   }
@@ -115,6 +122,10 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
 
   let bufferingPolicy: AsyncStream<T>.Continuation.BufferingPolicy
 
+  /// Updates the observable value on the main thread.
+  /// This method is called internally when the underlying value changes.
+  ///
+  /// - Parameter value: The new value to set in the observable state
   open func updateObservableValue(_ value: T) {
     if !shouldUpdateObservable {
       return
@@ -130,55 +141,33 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
   private func didUpdateFromObservable(_ value: T) {
     if shouldUpdateFromObservable {
       shouldUpdateObservable = false
-      // print("calling didUpdateFromObservable \(value) \(self.continuations.count)")
       update(value)
       shouldUpdateObservable = true
     }
   }
 
   /// Creates a new state manager with the given initial value.
-  /// This initializer can be called from any context and will properly set up
-  /// the MainActor-bound observable state.
+  /// This initializer can be called from any context 
   ///
-  /// - Parameter initialValue: The initial value to manage
+  /// - Parameters:
+  ///   - initialValue: The initial value to manage
+  ///   - bufferingPolicy: The buffering policy for async streams (default: .unbounded)
+  ///   - serialQueue: The dispatch queue used for synchronization (default: new serial queue)
   public init(
     _ initialValue: T,
     bufferingPolicy: AsyncStream<T>.Continuation.BufferingPolicy = .unbounded,
     serialQueue: DispatchQueue = DispatchSerialQueue(label: "AsyncObservable")
   )
-    async
   {
     _value = initialValue
     self.bufferingPolicy = bufferingPolicy
     self.serialQueue = serialQueue
-    await MainActor.run {
-      observable = .init(value: initialValue, didSetValue: didUpdateFromObservable)
-    }
-  }
-
-  /// Creates a new state manager with the given initial value when already on the MainActor.
-  /// This convenience initializer avoids the need for async/await when initializing from UI code.
-  ///
-  /// - Parameter initialValue: The initial value to manage
-  @MainActor
-  public init(
-    _ initialValue: T,
-    bufferingPolicy: AsyncStream<T>.Continuation.BufferingPolicy = .unbounded,
-    serialQueue: DispatchQueue = DispatchSerialQueue(label: "AsyncObservable")
-  ) {
-    _value = initialValue
-    self.bufferingPolicy = bufferingPolicy
-    self.serialQueue = serialQueue
-    observable = .init(value: initialValue, didSetValue: didUpdateFromObservable)
   }
 
   private func updated(_ value: T, notifyObservers: Bool = true, updateObservable: Bool = true) {
     if notifyObservers {
-      // print("notifying observers \(value) \(self.continuations.count)")
       continuationsQueue.sync {
-        for (id, continuation) in self.continuations {
-          // print("yielding value", value, "to continuation", id)
-
+        for (_, continuation) in self.continuations {
           continuation.yield(value)
         }
       }
@@ -190,27 +179,34 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
 
   /// Updates the managed value and propagates the change to all observers.
   ///
-  /// - Parameter value: The new value to set
+  /// - Parameters:
+  ///   - value: The new value to set
+  ///   - notifyObservers: Whether to notify stream observers (default: true)
+  ///   - updateObservable: Whether to update the observable state (default: true)
   public func update(_ value: T, notifyObservers: Bool = true, updateObservable: Bool = true) {
     self.value = value
-    // print("calling updated from update \(value) \(self.continuations.count)")
     updated(value, notifyObservers: notifyObservers, updateObservable: updateObservable)
   }
 
   /// Updates the managed value using a transform function and propagates the change to all observers.
   ///
-  /// - Parameter cb: A closure that takes the current value and returns a new value
+  /// - Parameters:
+  ///   - cb: A closure that takes the current value and returns a new value
+  ///   - notifyObservers: Whether to notify stream observers (default: true)
+  ///   - updateObservable: Whether to update the observable state (default: true)
   public func update(
     _ cb: @escaping (_ value: T) -> (T), notifyObservers: Bool = true, updateObservable: Bool = true
   ) {
     let newValue = cb(value)
-    // print("calling update from update \(newValue) \(self.continuations.count)")
     update(newValue, notifyObservers: notifyObservers, updateObservable: updateObservable)
   }
 
   /// Mutates the managed value in place and propagates the change to all observers.
   ///
-  /// - Parameter cb: A closure that can modify the value in place
+  /// - Parameters:
+  ///   - cb: A closure that can modify the value in place
+  ///   - notifyObservers: Whether to notify stream observers (default: true)
+  ///   - updateObservable: Whether to update the observable state (default: true)
   public func mutate(
     _ cb: @escaping (_ value: inout T) -> Void, notifyObservers: Bool = true,
     updateObservable: Bool = true
@@ -218,7 +214,6 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
     serialQueue.sync {
       cb(&_value)
     }
-    // print("calling updated from mutate")
     updated(value, notifyObservers: notifyObservers, updateObservable: updateObservable)
   }
 
@@ -236,7 +231,7 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
   /// Creates an AsyncStream that will receive all value updates.
   /// The stream immediately yields the current value and then yields all subsequent updates.
   ///
-  /// - Returns: An AsyncStream of values that can be used with async/await code
+  /// - Returns: A StreamOf<T> instance that can be used with async/await code
   private func stream() -> StreamOf<T> {
     let id = UUID()
     return StreamOf<T>(
@@ -250,21 +245,5 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
         self.setContinuation(id: id, continuation: continuation)
         continuation.yield(self.value)
       })
-    // AsyncStream(bufferingPolicy: bufferingPolicy) { [weak self] continuation in
-    // AsyncStream(bufferingPolicy: bufferingPolicy) { [weak self] continuation in
-    //   guard let self = self else { return }
-
-    //   let id = UUID()
-
-    //   self.setContinuation(id: id, continuation: continuation)
-    //   continuation.yield(self.value)
-
-    //   continuation.onTermination
-
-    //   continuation.onTermination = { @Sendable [weak self] _ in
-    //     guard let self else { return }
-    //     self.setContinuation(id: id, continuation: nil)
-    //   }
-    // }
   }
 }

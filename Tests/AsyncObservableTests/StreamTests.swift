@@ -8,7 +8,7 @@ struct AsyncObservableStreamTests {
   @Test("Should provide updates via async stream")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testAsyncStream() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
 
     var receivedValues: [Int] = []
     let valueStream = observable.valueStream
@@ -40,7 +40,7 @@ struct AsyncObservableStreamTests {
   @Test("Should handle multiple observers")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testMultipleObservers() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
 
     // Create two separate streams
     let stream1 = observable.valueStream
@@ -80,7 +80,7 @@ struct AsyncObservableStreamTests {
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testBufferingPolicy() async {
     // Create observable with buffer size of 2
-    let observable = await AsyncObservable(0, bufferingPolicy: .bufferingNewest(2))
+    let observable = AsyncObservable(0, bufferingPolicy: .bufferingNewest(2))
 
     // Make multiple updates before starting to observe
     observable.update(1)
@@ -113,7 +113,7 @@ struct AsyncObservableStreamTests {
   @Test("Should not update observers when notifyObservers is false")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testSilentUpdate() async {
-    let observable = await AsyncObservable(10)
+    let observable = AsyncObservable(10)
     let valueStream = observable.valueStream
 
     // Consume initial value

@@ -18,7 +18,7 @@ struct AsyncObservableUserDefaultsTests {
     userDefaults.removeObject(forKey: testKey)
 
     // Create and update the observable
-    let observable = await AsyncObservableUserDefaults(key: testKey, initialValue: initialValue, userDefaults: userDefaults)
+    let observable = AsyncObservableUserDefaults(key: testKey, initialValue: initialValue, userDefaults: userDefaults)
     let newValue = 100
     observable.update(newValue)
 
@@ -48,7 +48,7 @@ struct AsyncObservableUserDefaultsTests {
     }
 
     // Now initialize the observable with a different value
-    let observable = await AsyncObservableUserDefaults(key: testKey, initialValue: 0, userDefaults: userDefaults)
+    let observable = AsyncObservableUserDefaults(key: testKey, initialValue: 0, userDefaults: userDefaults)
 
     // It should use the persisted value, not the initial value
     #expect(observable.value == persistedValue, "Should load the persisted value")
@@ -63,7 +63,7 @@ struct AsyncObservableUserDefaultsTests {
     let testKey = "test_remove_key"
 
     // Create and set a value
-    _ = await AsyncObservableUserDefaults(key: testKey, initialValue: 42, userDefaults: userDefaults)
+    _ = AsyncObservableUserDefaults(key: testKey, initialValue: 42, userDefaults: userDefaults)
     userDefaults.synchronize()
     // Verify it exists in UserDefaults
     #expect(userDefaults.data(forKey: testKey) == nil)
@@ -83,7 +83,7 @@ struct AsyncObservableUserDefaultsTests {
     let initialSettings = Settings(username: "user", count: 0, isEnabled: false)
 
     // Create with initial value
-    let observable = await AsyncObservableUserDefaults(key: testKey, initialValue: initialSettings, userDefaults: userDefaults)
+    let observable = AsyncObservableUserDefaults(key: testKey, initialValue: initialSettings, userDefaults: userDefaults)
 
     // Update with new value
     let newSettings = Settings(username: "newuser", count: 42, isEnabled: true)

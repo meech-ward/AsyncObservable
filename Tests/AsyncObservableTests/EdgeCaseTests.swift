@@ -8,7 +8,7 @@ struct AsyncObservableEdgeCasesTests {
   @Test("Should handle nil optional values")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testNilOptionalValues() async {
-    let observable = await AsyncObservable<Int?>(42)
+    let observable = AsyncObservable<Int?>(42)
     
     // Update to nil
     observable.update(nil)
@@ -27,7 +27,7 @@ struct AsyncObservableEdgeCasesTests {
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testEmptyCollections() async {
     // Start with non-empty collection
-    let observable = await AsyncObservable(["a", "b", "c"])
+    let observable = AsyncObservable(["a", "b", "c"])
     
     // Update to empty
     observable.update([])
@@ -49,7 +49,7 @@ struct AsyncObservableEdgeCasesTests {
   func testLargeValues() async {
     // Create a moderate array (10,000 elements is enough to test the concept)
     let largeArray = Array(repeating: "test", count: 10_000)
-    let observable = await AsyncObservable(largeArray)
+    let observable = AsyncObservable(largeArray)
     
     #expect(observable.value.count == 10_000)
     
@@ -64,7 +64,7 @@ struct AsyncObservableEdgeCasesTests {
   @Test("Should handle frequent rapid updates")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testRapidUpdates() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
     let valueStream = observable.valueStream
     
     // Perform 1000 rapid updates
@@ -110,7 +110,7 @@ struct AsyncObservableEdgeCasesTests {
     let level2 = NestedStruct(name: "Level 2", children: [level3])
     let level1 = NestedStruct(name: "Level 1", children: [level2])
     
-    let observable = await AsyncObservable(level1)
+    let observable = AsyncObservable(level1)
     
     // Mutate a deeply nested value
     observable.mutate { root in

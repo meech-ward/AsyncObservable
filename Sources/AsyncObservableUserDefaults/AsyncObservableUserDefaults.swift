@@ -6,7 +6,7 @@ import Foundation
 /// Example usage:
 /// ```swift
 /// // Create a persistent manager
-/// let manager = await AsyncObservableUserDefaults(
+/// let manager = AsyncObservableUserDefaults(
 ///     key: "stored_counter",
 ///     initialValue: 0
 /// )
@@ -22,20 +22,6 @@ public class AsyncObservableUserDefaults<T: Sendable & Codable>: AsyncObservable
   public let userDefaults: UserDefaults
   public let key: String
 
-  public init(
-    key: String, initialValue: T, userDefaults: UserDefaults = .standard, serialQueue: DispatchQueue = DispatchSerialQueue(label: "AsyncObservable")
-  ) async {
-    var _initialValue = initialValue
-    self.userDefaults = userDefaults
-    if let data = userDefaults.data(forKey: key), let value = try? JSONDecoder().decode(T.self, from: data) {
-      _initialValue = value
-    }
-
-    self.key = key
-    await super.init(_initialValue, serialQueue: serialQueue)
-  }
-
-  @MainActor
   public init(
     key: String, initialValue: T, userDefaults: UserDefaults = .standard, serialQueue: DispatchQueue = DispatchSerialQueue(label: "AsyncObservable")
   ) {

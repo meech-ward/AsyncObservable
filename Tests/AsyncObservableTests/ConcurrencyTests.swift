@@ -9,7 +9,7 @@ struct AsyncObservableConcurrencyTests {
   @Test("Should handle simultaneous updates from multiple tasks")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testSimultaneousUpdates() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
 
     // Track all values seen by the stream
     var allValuesSeen = [Int]()
@@ -71,7 +71,7 @@ struct AsyncObservableConcurrencyTests {
   @Test("Should handle observers being added/removed during updates")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testObserverLifecycles() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
 
     var stream1Values = [Int]()
     var stream2Values = [Int]()
@@ -147,7 +147,7 @@ struct AsyncObservableConcurrencyTests {
   @Test("Should handle cancellation during updates")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testCancellationDuringUpdates() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
 
     var valuesReceived = [Int]()
 

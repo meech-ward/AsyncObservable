@@ -8,7 +8,7 @@ struct AsyncObservableAdvancedTests {
   @Test("Should maintain proper sequencing of operations")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testOperationSequencing() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
     
     var receivedValues = [Int]()
 
@@ -42,7 +42,7 @@ struct AsyncObservableAdvancedTests {
     // Test with different buffering policies
     
     // 1. Unbounded buffer
-    let unboundedObservable = await AsyncObservable(0, bufferingPolicy: .unbounded)
+    let unboundedObservable = AsyncObservable(0, bufferingPolicy: .unbounded)
     
     // Generate many updates
     for i in 1...100 {
@@ -69,7 +69,7 @@ struct AsyncObservableAdvancedTests {
            "Should contain either initial or final value")
     
     // 2. No buffer (only current value)
-    let noBufferObservable = await AsyncObservable(0, bufferingPolicy: .bufferingOldest(1))
+    let noBufferObservable = AsyncObservable(0, bufferingPolicy: .bufferingOldest(1))
     
     // Generate many updates
     for i in 1...100 {
@@ -95,7 +95,7 @@ struct AsyncObservableAdvancedTests {
   @Test("Should handle updates during observer iteration")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testUpdatingDuringIteration() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
     
     var receivedValues = [Int]()
     let valueStream = observable.valueStream
@@ -144,7 +144,7 @@ struct AsyncObservableAdvancedTests {
   @Test("Should handle value cycling and detection of duplicate updates")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testValueCycling() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
     
     var receivedValues = [Int]()
     let valueStream = observable.valueStream
@@ -195,7 +195,7 @@ struct AsyncObservableAdvancedTests {
   @Test("Should handle defensive value checks")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testDefensiveChecks() async {
-    let observable = await AsyncObservable(10)
+    let observable = AsyncObservable(10)
     
     // Get initial value
     let initialValue = observable.value

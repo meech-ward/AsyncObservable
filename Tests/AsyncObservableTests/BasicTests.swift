@@ -19,7 +19,7 @@ struct AsyncObservableBasicTests {
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testInitialization() async {
     let initialValue = 42
-    let observable = await AsyncObservable(initialValue)
+    let observable = AsyncObservable(initialValue)
 
     await ensureValue(initialValue, asyncObservable: observable)
   }
@@ -27,7 +27,7 @@ struct AsyncObservableBasicTests {
   @Test("Should update value directly")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testDirectUpdate() async {
-    let observable = await AsyncObservable(0)
+    let observable = AsyncObservable(0)
     let newValue = 100
 
     let valueStream = observable.valueStream
@@ -41,7 +41,7 @@ struct AsyncObservableBasicTests {
   @Test("Should update value with transform")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testTransformUpdate() async {
-    let observable = await AsyncObservable(10)
+    let observable = AsyncObservable(10)
 
     let valueStream = observable.valueStream
     observable.update { currentValue in
@@ -55,7 +55,7 @@ struct AsyncObservableBasicTests {
   @Test("Should mutate value in place")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testMutateValue() async {
-    let observable = await AsyncObservable([1, 2, 3])
+    let observable = AsyncObservable([1, 2, 3])
 
     let valueStream = observable.valueStream
     observable.mutate { value in
