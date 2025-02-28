@@ -49,7 +49,7 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
   @MainActor
   public class State {
     /// The current value, only settable internally but observable externally
-    public internal(set) var value: T {
+    public var value: T {
       didSet {
         didSetValue(value)
       }

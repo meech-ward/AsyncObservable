@@ -3,6 +3,11 @@ import Foundation
 /// A specialized version of AsyncObservable that persists its value to UserDefaults.
 /// The managed value must conform to both Sendable and Codable protocols.
 ///
+/// This class automatically:
+/// - Loads the initial value from UserDefaults if available
+/// - Persists value changes to UserDefaults
+/// - Maintains all the async stream and observable functionality of AsyncObservable
+///
 /// Example usage:
 /// ```swift
 /// // Create a persistent manager
@@ -12,18 +17,31 @@ import Foundation
 /// )
 ///
 /// // Value will be automatically saved to UserDefaults on updates
-/// await manager.update(42)
+/// manager.update(42)
 ///
 /// // Remove the value from UserDefaults
 /// manager.remove()
 /// ```
 @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
 public class AsyncObservableUserDefaults<T: Sendable & Codable>: AsyncObservable<T>, @unchecked Sendable {
+  /// The UserDefaults instance used for persistence
   public let userDefaults: UserDefaults
+  
+  /// The key used to store the value in UserDefaults
   public let key: String
 
+  /// Creates a new AsyncObservableUserDefaults instance.
+  ///
+  /// - Parameters:
+  ///   - key: The key to use for storing the value in UserDefaults
+  ///   - initialValue: The initial value to use if no value is found in UserDefaults
+  ///   - userDefaults: The UserDefaults instance to use (default: .standard)
+  ///   - serialQueue: The dispatch queue used for synchronization (default: new serial queue)
   public init(
-    key: String, initialValue: T, userDefaults: UserDefaults = .standard, serialQueue: DispatchQueue = DispatchSerialQueue(label: "AsyncObservable")
+    key: String, 
+    initialValue: T, 
+    userDefaults: UserDefaults = .standard, 
+    serialQueue: DispatchQueue = DispatchSerialQueue(label: "AsyncObservable")
   ) {
     var _initialValue = initialValue
     self.userDefaults = userDefaults
@@ -35,10 +53,9 @@ public class AsyncObservableUserDefaults<T: Sendable & Codable>: AsyncObservable
     super.init(_initialValue, serialQueue: serialQueue)
   }
 
-  /// Task that synchronizes the observable state with the current value
-  private var updateStateTask: Task<Void, Never>?
-
-  /// Sets up the task that keeps the observable state in sync with the current value
+  /// Updates the observable value and persists the change to UserDefaults.
+  ///
+  /// - Parameter value: The new value to set in the observable state and persist
   override open func updateObservableValue(_ value: T) {
     super.updateObservableValue(value)
     save(value, forKey: key)
@@ -46,7 +63,7 @@ public class AsyncObservableUserDefaults<T: Sendable & Codable>: AsyncObservable
 
   /// Removes the stored value from UserDefaults.
   /// This does not affect the current in-memory value.
-  func remove() {
+  public func remove() {
     userDefaults.removeObject(forKey: key)
   }
 
