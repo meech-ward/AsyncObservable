@@ -1,4 +1,9 @@
 import Foundation
+import Dispatch
+
+#if canImport(Observation)
+import Observation
+#endif
 
 /// A thread-safe state management system that provides both async stream-based observation
 /// and SwiftUI/UIKit compatible state observation through the Swift observation framework.
@@ -85,7 +90,7 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
   }
 
   /// Storage for active stream continuations, keyed by UUID to allow multiple observers
-  private let continuationsQueue = DispatchSerialQueue(label: "AsyncObservableContinuations")
+  private let continuationsQueue = DispatchQueue(label: "AsyncObservableContinuations")
   private var continuations: [UUID: AsyncStream<T>.Continuation] = [:]
 
   /// The current value managed by this instance.
@@ -156,7 +161,7 @@ open class AsyncObservable<T: Sendable>: @unchecked Sendable {
   public init(
     _ initialValue: T,
     bufferingPolicy: AsyncStream<T>.Continuation.BufferingPolicy = .unbounded,
-    serialQueue: DispatchQueue = DispatchSerialQueue(label: "AsyncObservable")
+    serialQueue: DispatchQueue = DispatchQueue(label: "AsyncObservable")
   )
   {
     _value = initialValue

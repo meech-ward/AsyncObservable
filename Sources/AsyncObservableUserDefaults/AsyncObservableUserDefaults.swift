@@ -1,5 +1,6 @@
 import AsyncObservable
 import Foundation
+
 /// A specialized version of AsyncObservable that persists its value to UserDefaults.
 /// The managed value must conform to both Sendable and Codable protocols.
 ///
@@ -26,7 +27,7 @@ import Foundation
 public class AsyncObservableUserDefaults<T: Sendable & Codable>: AsyncObservable<T>, @unchecked Sendable {
   /// The UserDefaults instance used for persistence
   public let userDefaults: UserDefaults
-  
+
   /// The key used to store the value in UserDefaults
   public let key: String
 
@@ -38,19 +39,24 @@ public class AsyncObservableUserDefaults<T: Sendable & Codable>: AsyncObservable
   ///   - userDefaults: The UserDefaults instance to use (default: .standard)
   ///   - serialQueue: The dispatch queue used for synchronization (default: new serial queue)
   public init(
-    key: String, 
-    initialValue: T, 
-    userDefaults: UserDefaults = .standard, 
-    serialQueue: DispatchQueue = DispatchSerialQueue(label: "AsyncObservable")
+    key: String,
+    initialValue: T,
+    userDefaults: UserDefaults = .standard,
+    serialQueue: DispatchQueue = DispatchQueue(label: "AsyncObservable"),
+    saveImmediately: Bool = false
   ) {
     var _initialValue = initialValue
     self.userDefaults = userDefaults
-    if let data = userDefaults.data(forKey: key), let value = try? JSONDecoder().decode(T.self, from: data) {
+    let data = userDefaults.data(forKey: key)
+    if let data, let value = try? JSONDecoder().decode(T.self, from: data) {
       _initialValue = value
     }
 
     self.key = key
     super.init(_initialValue, serialQueue: serialQueue)
+    if saveImmediately && data == nil {
+      save(initialValue, forKey: key)
+    }
   }
 
   /// Updates the observable value and persists the change to UserDefaults.

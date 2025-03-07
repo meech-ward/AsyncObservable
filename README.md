@@ -117,7 +117,7 @@ let someProperty = AsyncObservable("Hello, world!", bufferingPolicy: .bufferingN
 You can pass a custom dispatch queue to the initializer, just make sure it's a serial queue. Don't change the queue unless you really need to.
 
 ```swift
-let someProperty = AsyncObservable("Hello, world!", dispatchQueue: DispatchSerialQueue(label: "SomeQueue"))
+let someProperty = AsyncObservable("Hello, world!", dispatchQueue: DispatchQueue(label: "SomeQueue"))
 ```
 
 ## UserDefaults
