@@ -1,5 +1,7 @@
 # AsyncObservable
 
+![Build and Test](https://github.com/meech-ward/AsyncObservable/actions/workflows/build.yml/badge.svg)
+
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmeech-ward%2FAsyncObservable%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/meech-ward/AsyncObservable)
 
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmeech-ward%2FAsyncObservable%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/meech-ward/AsyncObservable)
