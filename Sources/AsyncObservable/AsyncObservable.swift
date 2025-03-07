@@ -47,7 +47,7 @@ import Observation
 /// }
 /// ```
 @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
-open class AsyncObservable<T: Sendable>: @unchecked Sendable {
+open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sendable {
   /// An Observable class that wraps the managed value for SwiftUI/UIKit integration.
   /// This class is bound to the MainActor to ensure all UI updates happen on the main thread.
   @Observable

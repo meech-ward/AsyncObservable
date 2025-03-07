@@ -121,6 +121,19 @@ let values = AsyncObservable([1, 2, 3])
 values.mutate { $0.append(4) }
 ```
 
+## Read Only
+
+If you want to expose an AsyncObservable as a read only property, you can use the `AsyncObservableReadOnly` protocol externally.
+
+```swift
+class SomeClass {
+  // .update is availble on the private property
+  private let _someProperty = AsyncObservable("whatever")
+  // but not on the public property, unless someone casts, but this should be enought of a deterrent
+  var someProperty: AsyncObservableReadOnly<String> { _someProperty }
+}
+```
+
 ## Buffering Policy
 
 The buffering policy defaults to `.unbounded`, but you can change it on init.
