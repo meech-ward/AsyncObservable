@@ -1,8 +1,25 @@
 # AsyncObservable
 
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmeech-ward%2FAsyncObservable%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/meech-ward/AsyncObservable)
+
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmeech-ward%2FAsyncObservable%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/meech-ward/AsyncObservable)
+
+The API is probably stable. Let me know if the API should change, otherwise this API will get bumped to 1.0.0.
+
+```swift
+// values
+asyncObservable.value
+asyncObservable.valueStream
+asyncObservable.valueObservable
+
+// updates
+asyncObservable.update(2)
+asyncObservable.update { $0 + 1 }
+asyncObservable.mutate { $0.append(4) }
+```
+
 Some of the features that Combine used to offer, but using Swift concurrency and @Observable instead. So it's more compatible with modern setups and should work just fine on any platform.
 Designed for Swift 6.
-
 
 A single property that is thread safe and can be observed using async streams or @Observable.
 
@@ -33,10 +50,9 @@ struct SomethingView: View {
 }
 ```
 
-
 ## Stream
 
-The streams buffering policy defaults to `.unbounded`, so it will "gather" values as soon as you create it. 
+The streams buffering policy defaults to `.unbounded`, so it will "gather" values as soon as you create it.
 
 ```swift
 let someProperty = AsyncObservable(1)
@@ -79,7 +95,7 @@ let stream = someProperty.valueStream // already has 1
 // only print first value
 for await value in stream {
   print(value) // 1
-  break 
+  break
 }
 
 // don't do this ❌
@@ -89,7 +105,7 @@ for await value in stream {
 
 // do this ✅
 for await value in someProperty.valueStream {
- 
+
 }
 ```
 
@@ -103,8 +119,7 @@ let values = AsyncObservable([1, 2, 3])
 values.mutate { $0.append(4) }
 ```
 
-
-## Buffering Policy 
+## Buffering Policy
 
 The buffering policy defaults to `.unbounded`, but you can change it on init.
 
@@ -127,4 +142,3 @@ Use the `AsyncObservableUserDefaults` class to store values in UserDefaults. Wor
 ```swift
 let someProperty = AsyncObservableUserDefaults("someKey", initialValue: "Hello, world!")
 ```
-
