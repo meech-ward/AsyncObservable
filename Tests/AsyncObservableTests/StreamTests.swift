@@ -11,13 +11,13 @@ struct AsyncObservableStreamTests {
     let observable = AsyncObservable(0)
 
     var receivedValues: [Int] = []
-    let valueStream = observable.valueStream
+    let stream = observable.stream
 
     // Consume initial value first
     // Now set up a task to capture the next values
     let task = Task {
       var count = 0
-      for await value in valueStream {
+      for await value in stream {
         receivedValues.append(value)
         count += 1
         if count >= 3 {
@@ -43,8 +43,8 @@ struct AsyncObservableStreamTests {
     let observable = AsyncObservable(0)
 
     // Create two separate streams
-    let stream1 = observable.valueStream
-    let stream2 = observable.valueStream
+    let stream1 = observable.stream
+    let stream2 = observable.stream
     
     // Consume initial values first
     var values1: [Int] = []
@@ -93,7 +93,7 @@ struct AsyncObservableStreamTests {
     
     // Create a task with a timeout to avoid hanging
     let task = Task {
-      for await value in observable.valueStream {
+      for await value in observable.stream {
         receivedValues.append(value)
         if receivedValues.count >= 3 {
           break
@@ -114,10 +114,10 @@ struct AsyncObservableStreamTests {
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testSilentUpdate() async {
     let observable = AsyncObservable(10)
-    let valueStream = observable.valueStream
+    let stream = observable.stream
 
     // Consume initial value
-    for await value in valueStream {
+    for await value in stream {
       #expect(value == 10)
       break
     }
@@ -128,7 +128,7 @@ struct AsyncObservableStreamTests {
     // Set up a task that will time out if no value is received
     var receivedValue = false
     let task = Task {
-      for await _ in valueStream {
+      for await _ in stream {
         receivedValue = true
         break
       }
@@ -142,7 +142,7 @@ struct AsyncObservableStreamTests {
     #expect(receivedValue == false)
     
     // But the internal value should be updated
-    #expect(observable.value == 20)
-    await #expect(observable.valueObservable == 20)
+    #expect(observable.raw == 20)
+    await #expect(observable.observable == 20)
   }
 } 

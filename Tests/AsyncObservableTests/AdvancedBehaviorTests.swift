@@ -12,9 +12,9 @@ struct AsyncObservableAdvancedTests {
     
     var receivedValues = [Int]()
 
-    let valueStream = observable.valueStream
+    let stream = observable.stream
     let task = Task {
-      for await value in valueStream {
+      for await value in stream {
         receivedValues.append(value)
         if receivedValues.count >= 4 {
           break
@@ -33,7 +33,7 @@ struct AsyncObservableAdvancedTests {
     
     // We should have received values in the correct sequence
     #expect(receivedValues == [0, 1, 2, 3])
-    #expect(observable.value == 3)
+    #expect(observable.raw == 3)
   }
   
   @Test("Should handle custom buffering policies")
@@ -51,7 +51,7 @@ struct AsyncObservableAdvancedTests {
     
     var unboundedValues = [Int]()
     let unboundedTask = Task {
-      for await value in unboundedObservable.valueStream {
+      for await value in unboundedObservable.stream {
         unboundedValues.append(value)
         if unboundedValues.count >= 10 {
           break // Important to break the loop
@@ -78,7 +78,7 @@ struct AsyncObservableAdvancedTests {
     
     var noBufferValues = [Int]()
     let noBufferTask = Task {
-      for await value in noBufferObservable.valueStream {
+      for await value in noBufferObservable.stream {
         noBufferValues.append(value)
         break // Break immediately after first value
       }
@@ -98,11 +98,11 @@ struct AsyncObservableAdvancedTests {
     let observable = AsyncObservable(0)
     
     var receivedValues = [Int]()
-    let valueStream = observable.valueStream
+    let stream = observable.stream
     
     // Set up a task that will perform updates when specific values are observed
     let updateTask = Task {
-      for await value in valueStream {
+      for await value in stream {
         receivedValues.append(value)
         
         // When we see value 2, trigger an update to 10
@@ -138,7 +138,7 @@ struct AsyncObservableAdvancedTests {
     #expect(receivedValues.contains(20))
     
     // Final value should be 20
-    #expect(observable.value == 20)
+    #expect(observable.raw == 20)
   }
   
   @Test("Should handle value cycling and detection of duplicate updates")
@@ -147,10 +147,10 @@ struct AsyncObservableAdvancedTests {
     let observable = AsyncObservable(0)
     
     var receivedValues = [Int]()
-    let valueStream = observable.valueStream
+    let stream = observable.stream
     
     // Consume initial value
-    for await value in valueStream {
+    for await value in stream {
       receivedValues.append(value)
       break
     }
@@ -161,7 +161,7 @@ struct AsyncObservableAdvancedTests {
     // Create a task to collect values
     let task = Task {
       var count = 0
-      for await value in valueStream {
+      for await value in stream {
         receivedValues.append(value)
         count += 1
         if count >= updatedValues.count {
@@ -198,21 +198,21 @@ struct AsyncObservableAdvancedTests {
     let observable = AsyncObservable(10)
     
     // Get initial value
-    let initialValue = observable.value
+    let initialValue = observable.raw
     #expect(initialValue == 10)
     
     // Verify we can update normally
     observable.update(30)
-    #expect(observable.value == 30)
+    #expect(observable.raw == 30)
     
     // Test that value updates correctly through different methods
     observable.update(40)
-    #expect(observable.value == 40)
+    #expect(observable.raw == 40)
     
     observable.update { current in current + 5 }
-    #expect(observable.value == 45)
+    #expect(observable.raw == 45)
     
     observable.mutate { value in value += 5 }
-    #expect(observable.value == 50)
+    #expect(observable.raw == 50)
   }
 } 

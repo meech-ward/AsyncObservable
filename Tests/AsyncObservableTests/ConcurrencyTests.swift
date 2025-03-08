@@ -15,13 +15,13 @@ struct AsyncObservableConcurrencyTests {
     var allValuesSeen = [Int]()
     
     // Initial value
-    allValuesSeen.append(observable.value)
+    allValuesSeen.append(observable.raw)
 
     // Observer task
-    let valueStream = observable.valueStream.dropFirst()
+    let stream = observable.stream.dropFirst()
     let observerTask = Task {
       // Use a fresh stream for continuous observation, skip initial value which we already recorded
-      for await value in valueStream {
+      for await value in stream {
         allValuesSeen.append(value)
         if allValuesSeen.count >= 20 {
           break
@@ -56,7 +56,7 @@ struct AsyncObservableConcurrencyTests {
     #expect(allValuesSeen.count > 1)
 
     // The final value should be one of the valid updates we made
-    let finalValue = observable.value
+    let finalValue = observable.raw
     #expect(finalValue != 0, "Value should have been updated from initial value")
     
     // Value should be in our expected range
@@ -78,12 +78,12 @@ struct AsyncObservableConcurrencyTests {
     var stream3Values = [Int]()
 
     // Add initial value to our tracking array
-    stream1Values.append(observable.value)
+    stream1Values.append(observable.raw)
 
     // Start first observer and skip initial value
-    let valueStream = observable.valueStream.dropFirst()
+    let stream = observable.stream.dropFirst()
     let task1 = Task {
-      for await value in valueStream {
+      for await value in stream {
         stream1Values.append(value)
         if stream1Values.count >= 4 { // Initial (0) + 3 more
           break
@@ -97,7 +97,7 @@ struct AsyncObservableConcurrencyTests {
 
     // Start second observer - include initial value
     let task2 = Task {
-      for await value in observable.valueStream {
+      for await value in observable.stream {
         stream2Values.append(value)
         if stream2Values.count >= 3 {
           break
@@ -114,7 +114,7 @@ struct AsyncObservableConcurrencyTests {
 
     // Start third observer - include initial value
     let task3 = Task {
-      for await value in observable.valueStream {
+      for await value in observable.stream {
         stream3Values.append(value)
         if stream3Values.count >= 2 {
           break
@@ -141,7 +141,7 @@ struct AsyncObservableConcurrencyTests {
     #expect(stream3Values.count > 0)
 
     // Final state check
-    #expect(observable.value == 5)
+    #expect(observable.raw == 5)
   }
 
   @Test("Should handle cancellation during updates")
@@ -153,9 +153,9 @@ struct AsyncObservableConcurrencyTests {
 
     // Start a task that will be cancelled during updates
     // Skip the initial value to simplify testing
-    let valueStream = observable.valueStream.dropFirst()
+    let stream = observable.stream.dropFirst()
     let task = Task {
-      for await value in valueStream {
+      for await value in stream {
         valuesReceived.append(value)
         // Simulate work that takes time
         try? await Task.sleep(nanoseconds: 10_000_000)
@@ -186,7 +186,7 @@ struct AsyncObservableConcurrencyTests {
     #expect(valuesReceived.count < 6) // We can't see all 6 values due to cancellation
 
     // Internal state should have all updates
-    #expect(observable.value == 4)
+    #expect(observable.raw == 4)
   }
 }
 

@@ -2,6 +2,14 @@
 
 All notable changes to AsyncObservable will be documented in this file.
 
+## [0.3.0] - 2025-03-08
+
+### Changed
+- I changed the API because I like to use the word "value" in other parts of my code and I ended up using "value.value" and it made me sad.
+  - value -> raw
+  - valueObservable -> observable
+  - valueStream -> stream
+
 ## [0.2.1] - 2025-03-07
 
 ### Added

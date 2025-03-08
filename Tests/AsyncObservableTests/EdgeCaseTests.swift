@@ -13,14 +13,14 @@ struct AsyncObservableEdgeCasesTests {
     // Update to nil
     observable.update(nil)
     
-    #expect(observable.value == nil)
-    await #expect(observable.valueObservable == nil)
+    #expect(observable.raw == nil)
+    await #expect(observable.observable == nil)
     
     // Update from nil back to value
     observable.update(100)
     
-    #expect(observable.value == 100)
-    await #expect(observable.valueObservable == 100)
+    #expect(observable.raw == 100)
+    await #expect(observable.observable == 100)
   }
   
   @Test("Should handle empty collections")
@@ -32,13 +32,13 @@ struct AsyncObservableEdgeCasesTests {
     // Update to empty
     observable.update([])
     
-    #expect(observable.value.isEmpty)
-    await #expect(observable.valueObservable.isEmpty)
+    #expect(observable.raw.isEmpty)
+    await #expect(observable.observable.isEmpty)
     
     // Test with stream
-    let valueStream = observable.valueStream
+    let stream = observable.stream
     
-    for await value in valueStream {
+    for await value in stream {
       #expect(value.isEmpty)
       break
     }
@@ -51,27 +51,27 @@ struct AsyncObservableEdgeCasesTests {
     let largeArray = Array(repeating: "test", count: 10_000)
     let observable = AsyncObservable(largeArray)
     
-    #expect(observable.value.count == 10_000)
+    #expect(observable.raw.count == 10_000)
     
     // Update with another array (20,000 elements)
     let largerArray = Array(repeating: "test", count: 20_000)
     observable.update(largerArray)
     
-    #expect(observable.value.count == 20_000)
-    await #expect(observable.valueObservable.count == 20_000)
+    #expect(observable.raw.count == 20_000)
+    await #expect(observable.observable.count == 20_000)
   }
   
   @Test("Should handle frequent rapid updates")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testRapidUpdates() async {
     let observable = AsyncObservable(0)
-    let valueStream = observable.valueStream
+    let stream = observable.stream
     
     // Perform 1000 rapid updates
     var lastSeen = -1
     let task = Task {
       var count = 0
-      for await value in valueStream {
+      for await value in stream {
         lastSeen = value
         count += 1
         if count >= 10 { // Only wait for 10 values to avoid test taking too long
@@ -91,7 +91,7 @@ struct AsyncObservableEdgeCasesTests {
     
     // We should have seen at least the last value
     #expect(lastSeen > 1)
-    #expect(observable.value == 1000)
+    #expect(observable.raw == 1000)
   }
   
   @Test("Should handle deeply nested structures")
@@ -118,6 +118,6 @@ struct AsyncObservableEdgeCasesTests {
     }
     
     // Check the deep update worked
-    #expect(observable.value.children[0].children[0].children[0].children[0].name == "Updated Level 5")
+    #expect(observable.raw.children[0].children[0].children[0].children[0].name == "Updated Level 5")
   }
 } 

@@ -9,20 +9,15 @@ public protocol AsyncObservableReadOnly<T>: Sendable {
     /// The type of value being observed.
     associatedtype T: Sendable
 
-    /// The observable state object for SwiftUI/UIKit integration.
-    /// This property is accessed on the MainActor to ensure thread-safe UI updates.
-    @MainActor
-    var observable: AsyncObservable<T>.State { get }
-
     /// The current value accessible from the MainActor.
     /// This is a convenience property that provides direct access to the observable value.
     @MainActor
-    var valueObservable: T { get }
+    var observable: T { get }
 
     /// An async stream of values that can be used with Swift concurrency.
     /// This property provides a convenient way to access the value stream.
-    var valueStream: StreamOf<T> { get }
+    var stream: StreamOf<T> { get }
 
     /// The current value managed by this instance.
-    var value: T { get }
+    var raw: T { get }
 } 

@@ -71,22 +71,22 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
   /// The observable state object for SwiftUI/UIKit integration.
   /// This property is accessed on the MainActor to ensure thread-safe UI updates.
   @MainActor
-  public lazy var observable: State = {
-    let observable = State(value: value, didSetValue: didUpdateFromObservable)
-    return observable
+  public lazy var observableState: State = {
+    let observableState = State(value: raw, didSetValue: didUpdateFromObservable)
+    return observableState
   }()
 
   /// The current value accessible from the MainActor.
   /// This is a convenience property that provides direct access to the observable value.
   @MainActor
-  public var valueObservable: T {
-    observable.value
+  public var observable: T {
+    observableState.value
   }
 
   /// An async stream of values that can be used with Swift concurrency.
   /// This property provides a convenient way to access the value stream without calling `stream()`.
-  public var valueStream: StreamOf<T> {
-    stream()
+  public var stream: StreamOf<T> {
+    streamOf()
   }
 
   /// Storage for active stream continuations, keyed by UUID to allow multiple observers
@@ -95,13 +95,13 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
 
   /// The current value managed by this instance.
   /// Updates to this value are automatically propagated to all observers.
-  private var _value: T
-  public private(set) var value: T {
+  private var _raw: T
+  public private(set) var raw: T {
     get {
-      serialQueue.sync { _value }
+      serialQueue.sync { _raw }
     }
     set {
-      serialQueue.sync { _value = newValue }
+      serialQueue.sync { _raw = newValue }
     }
   }
   private var _shouldUpdateFromObservable = true
@@ -137,7 +137,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
     }
     DispatchQueue.main.async {
       self.shouldUpdateFromObservable = false
-      self.observable.value = value
+      self.observableState.value = value
       self.shouldUpdateFromObservable = true
     }
   }
@@ -164,7 +164,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
     serialQueue: DispatchQueue = DispatchQueue(label: "AsyncObservable")
   )
   {
-    _value = initialValue
+    _raw = initialValue
     self.bufferingPolicy = bufferingPolicy
     self.serialQueue = serialQueue
   }
@@ -189,7 +189,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
   ///   - notifyObservers: Whether to notify stream observers (default: true)
   ///   - updateObservable: Whether to update the observable state (default: true)
   public func update(_ value: T, notifyObservers: Bool = true, updateObservable: Bool = true) {
-    self.value = value
+    self.raw = value
     updated(value, notifyObservers: notifyObservers, updateObservable: updateObservable)
   }
 
@@ -202,7 +202,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
   public func update(
     _ cb: @escaping (_ value: T) -> (T), notifyObservers: Bool = true, updateObservable: Bool = true
   ) {
-    let newValue = cb(value)
+    let newValue = cb(raw)
     update(newValue, notifyObservers: notifyObservers, updateObservable: updateObservable)
   }
 
@@ -217,9 +217,9 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
     updateObservable: Bool = true
   ) {
     serialQueue.sync {
-      cb(&_value)
+      cb(&_raw)
     }
-    updated(value, notifyObservers: notifyObservers, updateObservable: updateObservable)
+    updated(raw, notifyObservers: notifyObservers, updateObservable: updateObservable)
   }
 
   /// Internal helper to manage stream continuations
@@ -237,7 +237,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
   /// The stream immediately yields the current value and then yields all subsequent updates.
   ///
   /// - Returns: A StreamOf<T> instance that can be used with async/await code
-  private func stream() -> StreamOf<T> {
+  private func streamOf() -> StreamOf<T> {
     let id = UUID()
     return StreamOf<T>(
       bufferingPolicy: bufferingPolicy,
@@ -248,7 +248,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
       builder: { [weak self] continuation in
         guard let self else { return }
         self.setContinuation(id: id, continuation: continuation)
-        continuation.yield(self.value)
+        continuation.yield(self.raw)
       })
   }
 }

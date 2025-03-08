@@ -10,9 +10,9 @@ The API is probably stable. Let me know if the API should change, otherwise this
 
 ```swift
 // values
-asyncObservable.value
-asyncObservable.valueStream
-asyncObservable.valueObservable
+asyncObservable.raw
+asyncObservable.stream
+asyncObservable.observable
 
 // updates
 asyncObservable.update(2)
@@ -37,9 +37,9 @@ actor Something {
 }
 
 let something = Something()
-something.someProperty.value // "Hello, world!"
+something.someProperty.raw // "Hello, world!"
 
-for await value in something.someProperty.valueStream {
+for await value in something.someProperty.stream {
   print(value) // hello world (then whatever the property is updated to)
 }
 
@@ -47,7 +47,7 @@ for await value in something.someProperty.valueStream {
 struct SomethingView: View {
   let something: Something // Note: someProperty should be marked with @MainActor for this to work as is
   var body: some View {
-    Text(something.someProperty.valueObservable) // hello world (then whatever the property is updated to)
+    Text(something.someProperty.observable) // hello world (then whatever the property is updated to)
   }
 }
 ```
@@ -59,7 +59,7 @@ The streams buffering policy defaults to `.unbounded`, so it will "gather" value
 ```swift
 let someProperty = AsyncObservable(1)
 
-let stream = someProperty.valueStream // already has 1
+let stream = someProperty.stream // already has 1
 someProperty.update { $0 + 1 } // 2
 someProperty.update { $0 + 1 } // 3
 someProperty.update { $0 + 1 } // 4
@@ -74,7 +74,7 @@ Canceling the task that the stream is running in will cancel the stream. So you 
 ```swift
 let someProperty = AsyncObservable(1)
 
-let stream = someProperty.valueStream // already has 1
+let stream = someProperty.stream // already has 1
 let task = Task {
   for await value in stream {
     print(value) // 1, 2, 3
@@ -93,7 +93,7 @@ Streams are finalized as soon as you break out of the loop, so you can't reuse t
 ```swift
 let someProperty = AsyncObservable(1)
 
-let stream = someProperty.valueStream // already has 1
+let stream = someProperty.stream // already has 1
 // only print first value
 for await value in stream {
   print(value) // 1
@@ -106,7 +106,7 @@ for await value in stream {
 }
 
 // do this ✅
-for await value in someProperty.valueStream {
+for await value in someProperty.stream {
 
 }
 ```

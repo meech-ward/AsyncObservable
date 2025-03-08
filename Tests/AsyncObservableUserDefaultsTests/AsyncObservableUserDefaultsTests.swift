@@ -51,7 +51,7 @@ struct AsyncObservableUserDefaultsTests {
     let observable = AsyncObservableUserDefaults(key: testKey, initialValue: 0, userDefaults: userDefaults)
 
     // It should use the persisted value, not the initial value
-    #expect(observable.value == persistedValue, "Should load the persisted value")
+    #expect(observable.raw == persistedValue, "Should load the persisted value")
 
     // Clean up
     observable.remove()

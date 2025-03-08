@@ -16,9 +16,9 @@ struct AsyncObservableComplexTypesTests {
     let initialUser = User(name: "John", age: 30)
     let observable = AsyncObservable(initialUser)
 
-    let valueStream = observable.valueStream
+    let stream = observable.stream
     // Consume initial value
-    for await value in valueStream {
+    for await value in stream {
       #expect(value == initialUser)
       break
     }
@@ -31,14 +31,14 @@ struct AsyncObservableComplexTypesTests {
     let expectedUser = User(name: "Jane", age: 25)
     
     // Check updated value in stream
-    for await value in valueStream {
+    for await value in stream {
       #expect(value == expectedUser)
       break
     }
     
     // Check other interfaces
-    #expect(observable.value == expectedUser)
-    await #expect(observable.valueObservable == expectedUser)
+    #expect(observable.raw == expectedUser)
+    await #expect(observable.observable == expectedUser)
   }
   
   @Test("Should handle reference types")
@@ -67,10 +67,10 @@ struct AsyncObservableComplexTypesTests {
     }
     
     // The same instance with updated state should be observable
-    #expect(observable.value.count == 10)
+    #expect(observable.raw.count == 10)
     
     // Reference equality should be maintained
-    #expect(observable.value === initialCounter)
+    #expect(observable.raw === initialCounter)
     
     // Create a new instance with the same value
     let newCounter = Counter(count: 10)
@@ -79,10 +79,10 @@ struct AsyncObservableComplexTypesTests {
     observable.update(newCounter)
     
     // Value equality should match
-    #expect(observable.value == newCounter)
+    #expect(observable.raw == newCounter)
     
     // But reference equality should differ
-    #expect(observable.value !== initialCounter)
-    #expect(observable.value === newCounter)
+    #expect(observable.raw !== initialCounter)
+    #expect(observable.raw === newCounter)
   }
 } 

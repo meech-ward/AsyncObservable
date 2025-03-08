@@ -7,9 +7,9 @@ struct AsyncObservableBasicTests {
   
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   private func ensureValue<T: Equatable>(_ value: T, asyncObservable: AsyncObservable<T>) async {
-    #expect(asyncObservable.value == value)
-    await #expect(asyncObservable.valueObservable == value)
-    for await value in asyncObservable.valueStream {
+    #expect(asyncObservable.raw == value)
+    await #expect(asyncObservable.observable == value)
+    for await value in asyncObservable.stream {
       #expect(value == value)
       break
     }
@@ -30,10 +30,10 @@ struct AsyncObservableBasicTests {
     let observable = AsyncObservable(0)
     let newValue = 100
 
-    let valueStream = observable.valueStream
+    let stream = observable.stream
     observable.update(newValue)
-    await #expect(valueStream.first { _ in true } == 0)
-    await #expect(valueStream.first { _ in true } == newValue)
+    await #expect(stream.first { _ in true } == 0)
+    await #expect(stream.first { _ in true } == newValue)
 
     await ensureValue(newValue, asyncObservable: observable)
   }
@@ -43,12 +43,12 @@ struct AsyncObservableBasicTests {
   func testTransformUpdate() async {
     let observable = AsyncObservable(10)
 
-    let valueStream = observable.valueStream
+    let stream = observable.stream
     observable.update { currentValue in
       return currentValue * 2
     }
-    await #expect(valueStream.first { _ in true } == 10)
-    await #expect(valueStream.first { _ in true } == 20)
+    await #expect(stream.first { _ in true } == 10)
+    await #expect(stream.first { _ in true } == 20)
     await ensureValue(20, asyncObservable: observable)
   }
 
@@ -57,14 +57,14 @@ struct AsyncObservableBasicTests {
   func testMutateValue() async {
     let observable = AsyncObservable([1, 2, 3])
 
-    let valueStream = observable.valueStream
+    let stream = observable.stream
     observable.mutate { value in
       value.append(4)
     }
-    await #expect(valueStream.first { _ in true } == [1, 2, 3])
-    await #expect(valueStream.first { _ in true } == [1, 2, 3, 4])
+    await #expect(stream.first { _ in true } == [1, 2, 3])
+    await #expect(stream.first { _ in true } == [1, 2, 3, 4])
 
-    #expect(observable.value == [1, 2, 3, 4])
-    await #expect(observable.valueObservable == [1, 2, 3, 4])
+    #expect(observable.raw == [1, 2, 3, 4])
+    await #expect(observable.observable == [1, 2, 3, 4])
   }
 } 
