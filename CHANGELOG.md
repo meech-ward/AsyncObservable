@@ -2,6 +2,11 @@
 
 All notable changes to AsyncObservable will be documented in this file.
 
+## [0.3.2] - 2025-03-08
+
+### Fixed
+- made unwrappedStream public
+
 ## [0.3.1] - 2025-03-08
 
 ### Added
