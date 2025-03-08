@@ -252,7 +252,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
   }
 
   @available(iOS 17.0, macOS 15.0, tvOS 17.0, watchOS 10.0, *)
-  func unwrappedStream<U>() -> any AsyncSequence<U, Never> where T == U? {
+  public func unwrappedStream<U>() -> any AsyncSequence<U, Never> where T == U? {
     stream.compactMap { $0 }
   }
 
