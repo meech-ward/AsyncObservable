@@ -1,8 +1,8 @@
-import Foundation
 import Dispatch
+import Foundation
 
 #if canImport(Observation)
-import Observation
+  import Observation
 #endif
 
 /// A thread-safe state management system that provides both async stream-based observation
@@ -85,7 +85,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
 
   /// An async stream of values that can be used with Swift concurrency.
   /// This property provides a convenient way to access the value stream without calling `stream()`.
-  public var stream: StreamOf<T> {
+  open var stream: StreamOf<T> {
     streamOf()
   }
 
@@ -152,7 +152,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
   }
 
   /// Creates a new state manager with the given initial value.
-  /// This initializer can be called from any context 
+  /// This initializer can be called from any context
   ///
   /// - Parameters:
   ///   - initialValue: The initial value to manage
@@ -162,8 +162,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
     _ initialValue: T,
     bufferingPolicy: AsyncStream<T>.Continuation.BufferingPolicy = .unbounded,
     serialQueue: DispatchQueue = DispatchQueue(label: "AsyncObservable")
-  )
-  {
+  ) {
     _raw = initialValue
     self.bufferingPolicy = bufferingPolicy
     self.serialQueue = serialQueue
@@ -237,7 +236,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
   /// The stream immediately yields the current value and then yields all subsequent updates.
   ///
   /// - Returns: A StreamOf<T> instance that can be used with async/await code
-  private func streamOf() -> StreamOf<T> {
+  internal func streamOf() -> StreamOf<T> {
     let id = UUID()
     return StreamOf<T>(
       bufferingPolicy: bufferingPolicy,
@@ -251,4 +250,10 @@ open class AsyncObservable<T: Sendable>: AsyncObservableReadOnly, @unchecked Sen
         continuation.yield(self.raw)
       })
   }
+
+  @available(iOS 17.0, macOS 15.0, tvOS 17.0, watchOS 10.0, *)
+  func unwrappedStream<U>() -> any AsyncSequence<U, Never> where T == U? {
+    stream.compactMap { $0 }
+  }
+
 }

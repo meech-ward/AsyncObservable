@@ -2,6 +2,11 @@
 
 All notable changes to AsyncObservable will be documented in this file.
 
+## [0.3.1] - 2025-03-08
+
+### Added
+- Added unwrappedStream() method to AsyncObservable that allows you to read a stream of only non-nil values when the type is Optional.
+
 ## [0.3.0] - 2025-03-08
 
 ### Changed

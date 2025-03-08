@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import AsyncObservable
 
 @Suite("AsyncObservable Stream Tests")
@@ -36,7 +37,7 @@ struct AsyncObservableStreamTests {
 
     #expect(receivedValues == [0, 1, 2])
   }
-  
+
   @Test("Should handle multiple observers")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testMultipleObservers() async {
@@ -45,7 +46,7 @@ struct AsyncObservableStreamTests {
     // Create two separate streams
     let stream1 = observable.stream
     let stream2 = observable.stream
-    
+
     // Consume initial values first
     var values1: [Int] = []
     var values2: [Int] = []
@@ -56,7 +57,7 @@ struct AsyncObservableStreamTests {
         values1.append(value)
       }
     }
-    
+
     let task2 = Task {
       for await value in stream2 {
         values2.append(value)
@@ -90,7 +91,7 @@ struct AsyncObservableStreamTests {
 
     // Now start observing - we should get the current value (4) and possibly some buffered values
     var receivedValues: [Int] = []
-    
+
     // Create a task with a timeout to avoid hanging
     let task = Task {
       for await value in observable.stream {
@@ -100,7 +101,7 @@ struct AsyncObservableStreamTests {
         }
       }
     }
-    
+
     // Add a timeout to ensure the test doesn't hang if the stream doesn't yield enough values
     try? await Task.sleep(nanoseconds: 100_000_000)
     task.cancel()
@@ -109,7 +110,7 @@ struct AsyncObservableStreamTests {
     #expect(receivedValues.count > 0)
     #expect(receivedValues.contains(4), "Should contain the latest value")
   }
-  
+
   @Test("Should not update observers when notifyObservers is false")
   @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
   func testSilentUpdate() async {
@@ -140,9 +141,39 @@ struct AsyncObservableStreamTests {
 
     // No value should have been received
     #expect(receivedValue == false)
-    
+
     // But the internal value should be updated
     #expect(observable.raw == 20)
     await #expect(observable.observable == 20)
   }
-} 
+
+  @Test("unsrapped steram")
+  @available(iOS 17.0, macOS 15.0, tvOS 17.0, watchOS 10.0, *)
+  func testUnrappedStream() async {
+    let observable: AsyncObservable<Int?> = AsyncObservable(nil)
+    let stream = observable.unwrappedStream()
+
+    // should only get values that are not nil
+    var sum = 0
+    let task = Task {
+      for await value in stream {
+        sum += value
+        #expect(value != nil)
+      }
+    }
+
+    observable.update(nil)
+    observable.update(1)
+    observable.update(2)
+    observable.update(nil)
+    observable.update(3)
+    observable.update(nil)
+    observable.update(5)
+
+    // Give some time for potential values to arrive
+    try? await Task.sleep(for: .milliseconds(100))
+    task.cancel()
+
+    #expect(sum == 11)
+  }
+}

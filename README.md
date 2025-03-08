@@ -111,6 +111,19 @@ for await value in someProperty.stream {
 }
 ```
 
+## Unwrapped Stream
+
+If you want to read a stream of non-nil values, but your type is an optional, you can use the `unwrappedStream` method.
+
+```swift
+let someProperty = AsyncObservable(Data?)
+let stream = someProperty.unwrappedStream()
+
+for await value in stream {
+  print(value) // only non-nil values
+}
+```
+
 ## Mutate
 
 Sometimes you just want to mutate the original value instead of having to copy and return a new value. This still updates all the observers correctly and is safe.
