@@ -2,6 +2,25 @@
 
 All notable changes to AsyncObservable will be documented in this file.
 
+
+## [0.4.0] - 2025-03-09
+
+### Added
+- Added AsyncObservableUnwrapped.
+```swift
+let value: AsyncObservableUnwrapped<Data> = .init(nil) 
+value.current // Data?
+value.observable // Data?
+value.stream // Data
+```
+- Added swift docc
+
+### Removed
+- Removed unwrappedStream() method from AsyncObservable.
+- 
+### Changed
+- I changed the API again because raw feels wrong. Now its `property.current`
+
 ## [0.3.2] - 2025-03-08
 
 ### Fixed
