@@ -62,8 +62,8 @@ public class AsyncObservableUserDefaults<T: Sendable & Codable>: AsyncObservable
   /// Updates the observable value and persists the change to UserDefaults.
   ///
   /// - Parameter value: The new value to set in the observable state and persist
-  override open func updateObservableValue(_ value: T) {
-    super.updateObservableValue(value)
+  override open func updateNotifiers(_ value: T) {
+    super.updateNotifiers(value)
     save(value, forKey: key)
   }
 

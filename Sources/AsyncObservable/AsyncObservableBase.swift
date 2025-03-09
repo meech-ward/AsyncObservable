@@ -172,7 +172,7 @@ open class AsyncObservableBase<T: Sendable>: @unchecked Sendable {
   }
 
   // to be overridden by subclasses
-  internal func updateNotifiers(_ value: T) {
+  open func updateNotifiers(_ value: T) {
     // do nothing by default
   }
 

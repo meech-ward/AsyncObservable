@@ -4,7 +4,7 @@ import Foundation
 /// but provides a stream of non-optional values.
 ///
 /// `AsyncObservableUnwrapped` is designed for scenarios where you need to work
-/// with an optional state but only want to observe non-nil values.
+/// with an optional state but only want to observe non-nil values through the stream .
 /// The stream will only emit values when the underlying optional contains a value.
 ///
 /// Example usage:
@@ -24,7 +24,7 @@ import Foundation
 /// nameObservable.update("John")  // Stream will emit "John"
 ///
 /// // Update with nil
-/// nameObservable.update(nil)     // Stream will not emit
+/// nameObservable.update(nil)     // Stream will not emit, but the current and observable will be updated
 /// ```
 @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
 open class AsyncObservableUnwrapped<T: Sendable>: AsyncObservableBase<T?>, AsyncObservableUnwrappedStreamReadOnly, @unchecked Sendable {
@@ -35,7 +35,7 @@ open class AsyncObservableUnwrapped<T: Sendable>: AsyncObservableBase<T?>, Async
   /// This method is called internally when the underlying value changes.
   ///
   /// - Parameter value: The new optional value. Continuations are only updated if non-nil.
-  override internal func updateNotifiers(_ value: T?) {
+  override open func updateNotifiers(_ value: T?) {
     if let value {
       continuationsQueue.sync {
         for (_, continuation) in self.unwrappedContinuations {

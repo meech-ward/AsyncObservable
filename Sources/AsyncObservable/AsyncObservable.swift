@@ -32,7 +32,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableBase<T>, AsyncObservable
   /// This method is called internally when the underlying value changes.
   ///
   /// - Parameter value: The new value to send to all observers
-  override internal func updateNotifiers(_ value: T) {
+  override open func updateNotifiers(_ value: T) {
     continuationsQueue.sync {
       for (_, continuation) in self.continuations {
         continuation.yield(value)
