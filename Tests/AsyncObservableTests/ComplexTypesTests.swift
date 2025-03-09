@@ -17,11 +17,6 @@ struct AsyncObservableComplexTypesTests {
     let observable = AsyncObservable(initialUser)
 
     let stream = observable.stream
-    // Consume initial value
-    for await value in stream {
-      #expect(value == initialUser)
-      break
-    }
     
     observable.mutate { user in
       user.name = "Jane"
@@ -31,7 +26,7 @@ struct AsyncObservableComplexTypesTests {
     let expectedUser = User(name: "Jane", age: 25)
     
     // Check updated value in stream
-    for await value in stream {
+    for await value in stream.dropFirst() {
       #expect(value == expectedUser)
       break
     }

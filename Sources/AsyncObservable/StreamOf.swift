@@ -2,23 +2,27 @@
 /// Taken from Alamofire https://github.com/Alamofire/Alamofire/blob/2e7a741fc2af29bd833eddd45ee8c461987ff250/Source/Features/Concurrency.swift#L905
 /// Modified slightly
 /// This allows the async sequence to stop when the task is cancelled and removes the need for a if Task.isCancelled check inside every loop
+
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-public struct StreamOf<Element>: AsyncSequence {
+extension AsyncStream<Any>.Continuation.BufferingPolicy: @unchecked @retroactive Sendable {}
+
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+public struct StreamOf<Element>: AsyncSequence, Sendable where Element: Sendable {
   public typealias AsyncIterator = Iterator
   public typealias BufferingPolicy = AsyncStream<Element>.Continuation.BufferingPolicy
   typealias Continuation = AsyncStream<Element>.Continuation
 
   private let bufferingPolicy: BufferingPolicy
-  private let onTermination: (() -> Void)?
-  private let builder: (Continuation) -> Void
+  private let onTermination: (@Sendable () -> Void)?
+  private let builder: @Sendable (Continuation) -> Void
   private var continuation: AsyncStream<Element>.Continuation?
   private var stream: AsyncStream<Element>?
 
   init(
     bufferingPolicy: BufferingPolicy = .unbounded,
     buildStreamImmediately: Bool = true,
-    onTermination: (() -> Void)? = nil,
-    builder: @escaping (Continuation) -> Void
+    onTermination: (@Sendable () -> Void)? = nil,
+    builder: @escaping @Sendable (Continuation) -> Void
   ) {
     self.bufferingPolicy = bufferingPolicy
     self.onTermination = onTermination
