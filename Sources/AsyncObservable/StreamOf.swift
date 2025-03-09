@@ -10,7 +10,7 @@ extension AsyncStream<Any>.Continuation.BufferingPolicy: @unchecked @retroactive
 public struct StreamOf<Element>: AsyncSequence, Sendable where Element: Sendable {
   public typealias AsyncIterator = Iterator
   public typealias BufferingPolicy = AsyncStream<Element>.Continuation.BufferingPolicy
-  typealias Continuation = AsyncStream<Element>.Continuation
+  public typealias Continuation = AsyncStream<Element>.Continuation
 
   private let bufferingPolicy: BufferingPolicy
   private let onTermination: (@Sendable () -> Void)?
@@ -18,7 +18,7 @@ public struct StreamOf<Element>: AsyncSequence, Sendable where Element: Sendable
   private var continuation: AsyncStream<Element>.Continuation?
   private var stream: AsyncStream<Element>?
 
-  init(
+  public init(
     bufferingPolicy: BufferingPolicy = .unbounded,
     buildStreamImmediately: Bool = true,
     onTermination: (@Sendable () -> Void)? = nil,
