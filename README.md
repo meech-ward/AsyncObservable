@@ -6,11 +6,15 @@
 
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fmeech-ward%2FAsyncObservable%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/meech-ward/AsyncObservable)
 
-The API is probably stable. Let me know if the API should change, otherwise this API will get bumped to 1.0.0.
+## What is AsyncObservable?
+
+AsyncObservable is a lightweight library that provides observable state management with Swift Concurrency support. It bridges the gap between traditional property observation and modern async/await patterns by offering both `@Observable` compatibility and `async` streams. This makes it perfect for sharing state across your app while maintaining thread safety and supporting the latest Swift features.
+
+Let me know if the API should change, otherwise this API will get bumped to 1.0.0.
 
 ```swift
 // values
-asyncObservable.raw
+asyncObservable.current
 asyncObservable.stream
 asyncObservable.observable
 
@@ -20,10 +24,31 @@ asyncObservable.update { $0 + 1 }
 asyncObservable.mutate { $0.append(4) }
 ```
 
-Some of the features that Combine used to offer, but using Swift concurrency and @Observable instead. So it's more compatible with modern setups and should work just fine on any platform.
-Designed for Swift 6.
+## Installation
 
-A single property that is thread safe and can be observed using async streams or @Observable.
+### Swift Package Manager
+
+Add AsyncObservable to your Package.swift:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/meech-ward/AsyncObservable.git", from: "0.4.0")
+]
+```
+
+Or add it directly in Xcode via File → Add Packages...
+
+## Overview
+
+AsyncObservable provides some of the features that Combine used to offer, but using Swift concurrency and @Observable instead. This makes it more compatible with modern Swift setups and works on any platform that supports Swift 6.
+
+At its core, AsyncObservable offers a thread-safe property that can be observed using either async streams or @Observable, with these key capabilities:
+
+- **Thread safety**: Access and update properties safely from any context
+- **Async stream support**: Use modern Swift concurrency for reactive workflows
+- **@Observable integration**: Perfect for SwiftUI and modern Swift apps
+- **Cross-actor communication**: Share state across different actors
+- **Optional unwrapping**: Stream only non-nil values with `unwrappedStream`
 
 ```swift
 import AsyncObservable
@@ -37,7 +62,7 @@ actor Something {
 }
 
 let something = Something()
-something.someProperty.raw // "Hello, world!"
+something.someProperty.current // "Hello, world!"
 
 for await value in something.someProperty.stream {
   print(value) // hello world (then whatever the property is updated to)
@@ -107,20 +132,25 @@ for await value in stream {
 
 // do this ✅
 for await value in someProperty.stream {
-
+AsyncObservable
 }
 ```
 
-## Unwrapped Stream
 
-If you want to read a stream of non-nil values, but your type is an optional, you can use the `unwrappedStream` method.
+## AsyncObservableUnwrapped
+
+For a more streamlined approach when working exclusively with optional types, you can use `AsyncObservableUnwrapped` which automatically provides a stream of non-nil values:
 
 ```swift
-let someProperty = AsyncObservable(Data?)
-let stream = someProperty.unwrappedStream()
+let value = AsyncObservableUnwrapped<Data>(nil)
 
-for await value in stream {
-  print(value) // only non-nil values
+// Standard access to the optional value
+value.current // Data?
+value.observable // Data?
+
+// The stream automatically filters out nil values
+for await data in value.stream {
+  print(data) // Only non-nil Data values
 }
 ```
 
@@ -170,3 +200,72 @@ Use the `AsyncObservableUserDefaults` class to store values in UserDefaults. Wor
 ```swift
 let someProperty = AsyncObservableUserDefaults("someKey", initialValue: "Hello, world!")
 ```
+
+## Common Use Cases
+
+### Network Request State Management
+
+```swift
+actor NetworkService {
+    let requestState = AsyncObservable<RequestState>(.idle)
+    
+    func fetchData() async throws {
+        await requestState.update(.loading)
+        do {
+            let data = try await performNetworkRequest()
+            await requestState.update(.success(data))
+        } catch {
+            await requestState.update(.failure(error))
+        }
+    }
+}
+
+// In SwiftUI
+struct LoadingView: View {
+    let networkService: NetworkService
+    
+    var body: some View {
+        VStack {
+            switch networkService.requestState.observable {
+            case .idle: Text("Tap to load")
+            case .loading: ProgressView()
+            case .success(let data): DataView(data: data)
+            case .failure(let error): ErrorView(error: error)
+            }
+        }
+        .onAppear {
+            Task { try await networkService.fetchData() }
+        }
+    }
+}
+```
+
+### Cross-Actor Communication
+
+```swift
+actor DataProcessor {
+    let progress = AsyncObservable(0.0)
+    
+    func processItems(_ items: [Item]) async {
+        for (index, item) in items.enumerated() {
+            await process(item)
+            await progress.update(Double(index + 1) / Double(items.count))
+        }
+    }
+}
+
+// Monitor progress from anywhere
+Task {
+    for await progress in dataProcessor.progress.stream {
+        print("Progress: \(Int(progress * 100))%")
+    }
+}
+```
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+## License
+
+AsyncObservable is available under the MIT license. See the LICENSE file for more info.

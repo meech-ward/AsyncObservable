@@ -38,6 +38,7 @@ public class AsyncObservableUserDefaults<T: Sendable & Codable>: AsyncObservable
   ///   - initialValue: The initial value to use if no value is found in UserDefaults
   ///   - userDefaults: The UserDefaults instance to use (default: .standard)
   ///   - serialQueue: The dispatch queue used for synchronization (default: new serial queue)
+  ///   - saveImmediately: If true, the initial value will be saved to UserDefaults immediately (default: false)
   public init(
     key: String,
     initialValue: T,
