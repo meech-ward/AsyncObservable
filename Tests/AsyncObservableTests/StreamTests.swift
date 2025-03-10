@@ -171,4 +171,41 @@ struct AsyncObservableStreamTests {
     #expect(observable.raw == 20)
     await #expect(observable.observable == 20)
   }
+
+  @Test("Should not hold onto continuation if it doesn't have a reference")
+  @available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *)
+  func testNoReferenceToContinuation() async throws {
+    let observable = AsyncObservable(10)
+    let stream: StreamOf<Int> = observable.stream
+
+    @discardableResult
+    func getStream() -> StreamOf<Int> {
+      observable.stream
+    }
+
+    #expect(observable.continuations.count == 1)
+
+    var stream2: StreamOf<Int> = observable.stream
+
+    #expect(observable.continuations.count == 2)
+
+    for await _ in stream2 {
+      break
+    }
+
+    #expect(observable.continuations.count == 1)
+
+    for await _ in stream {
+      break
+    }
+
+    #expect(observable.continuations.count == 0)
+
+    stream2 = getStream()
+    observable.update(10)
+    getStream()
+    #expect(observable.continuations.count == 2)
+    observable.update(10)
+    #expect(observable.continuations.count == 1)
+  }
 }

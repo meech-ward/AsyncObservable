@@ -26,7 +26,7 @@ import Foundation
 open class AsyncObservable<T: Sendable>: AsyncObservableBase<T>, AsyncObservableReadOnly, @unchecked
   Sendable
 {
-  private var continuations: [UUID: AsyncStream<T>.Continuation] = [:]
+  internal var continuations: [UUID: AsyncStream<T>.Continuation] = [:]
 
   /// Updates all registered continuations with the new value.
   /// This method is called internally when the underlying value changes.
@@ -34,8 +34,15 @@ open class AsyncObservable<T: Sendable>: AsyncObservableBase<T>, AsyncObservable
   /// - Parameter value: The new value to send to all observers
   override open func updateNotifiers(_ value: T) {
     continuationsQueue.sync {
-      for (_, continuation) in self.continuations {
-        continuation.yield(value)
+      var terminations: [UUID] = []
+      for (id, continuation) in self.continuations {
+        let result = continuation.yield(value)
+        if case .terminated = result {
+          terminations.append(id)
+        }
+      }
+      for id in terminations {
+        self.continuations.removeValue(forKey: id)
       }
     }
   }
@@ -75,7 +82,7 @@ open class AsyncObservable<T: Sendable>: AsyncObservableBase<T>, AsyncObservable
       }
     )
   }
-  
+
   /// An async stream of values that can be used with Swift concurrency.
   /// This property provides a convenient way to access the value stream
   /// for observing all changes to the managed value.
