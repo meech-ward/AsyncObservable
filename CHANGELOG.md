@@ -2,6 +2,10 @@
 
 All notable changes to AsyncObservable will be documented in this file.
 
+## [0.4.1] - 2025-03-09
+
+### Added
+- Remove continuation manually if terminated by not being assigned to a variable
 
 ## [0.4.0] - 2025-03-09
 

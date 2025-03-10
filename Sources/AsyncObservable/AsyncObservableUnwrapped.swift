@@ -38,8 +38,16 @@ open class AsyncObservableUnwrapped<T: Sendable>: AsyncObservableBase<T?>, Async
   override open func updateNotifiers(_ value: T?) {
     if let value {
       continuationsQueue.sync {
-        for (_, continuation) in self.unwrappedContinuations {
-          continuation.yield(value)
+        var terminations: [UUID] = []
+
+        for (id, continuation) in self.unwrappedContinuations {
+          let result = continuation.yield(value)
+          if case .terminated = result {
+            terminations.append(id)
+          }
+        }
+        for id in terminations {
+          self.unwrappedContinuations.removeValue(forKey: id)
         }
       }
     }
