@@ -2,9 +2,13 @@
 /// Taken from Alamofire https://github.com/Alamofire/Alamofire/blob/2e7a741fc2af29bd833eddd45ee8c461987ff250/Source/Features/Concurrency.swift#L905
 /// Modified slightly
 /// This allows the async sequence to stop when the task is cancelled and removes the need for a if Task.isCancelled check inside every loop
-
+#if swift(>=6.0)
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 extension AsyncStream<Any>.Continuation.BufferingPolicy: @unchecked @retroactive Sendable {}
+#else
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
+extension AsyncStream<Any>.Continuation.BufferingPolicy: @unchecked Sendable {}
+#endif
 
 @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 public struct StreamOf<Element>: AsyncSequence, Sendable where Element: Sendable {
